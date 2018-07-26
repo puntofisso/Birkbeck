@@ -1,0 +1,1 @@
+cat all_tweets.csv | awk -F"|" {'print $3'} | tr ' ' '\n' | sed 's/ //g' | grep -v £ | tr -d $'\r' | tr -d '[.,:"‘“…?!;]' | sed s/’s/\'s/g | sed s/’ll/\'ll/g | sed s/’re/\'re/g | sed s/’ve/\'ve/g | sort | uniq

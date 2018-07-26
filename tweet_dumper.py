@@ -3,16 +3,15 @@
 
 import tweepy #https://github.com/tweepy/tweepy
 import csv
-import config
-# https://gist.github.com/yanofsky/5436496
 
 #Twitter API credentials
+consumer_key = "dCh2a46NkhvldZOfyp5rp58EE"
+consumer_secret = "fGMbmGmu228E3UTDluGkqAsdZEpT8oMXGycdpYs5rXBpMwY6wr"
+access_key = "14095937-3DbBhJUc8h7TNCVN3hw8X0ZMk6vVOYT4qPTIWYVub"
+access_secret = "KeHuyB3y3eV0l5ldVWtUqInXw8AYO3Wq6P47cncgYLi8L"
+
 
 def get_all_tweets(screen_name):
-	global consumer_key
-	global consumer_secret
-	global access_key
-	global access_secret
 	#Twitter only allows access to a users most recent 3240 tweets with this method
 	
 	#authorize twitter, initialize tweepy
@@ -24,7 +23,7 @@ def get_all_tweets(screen_name):
 	alltweets = []	
 	
 	#make initial request for most recent tweets (200 is the maximum allowed count)
-	new_tweets = api.user_timeline(screen_name = screen_name,count=200)
+	new_tweets = api.user_timeline(screen_name = screen_name,count=200, tweet_mode='extended')
 	
 	#save most recent tweets
 	alltweets.extend(new_tweets)
@@ -37,7 +36,7 @@ def get_all_tweets(screen_name):
 		print "getting tweets before %s" % (oldest)
 		
 		#all subsiquent requests use the max_id param to prevent duplicates
-		new_tweets = api.user_timeline(screen_name = screen_name,count=200,max_id=oldest)
+		new_tweets = api.user_timeline(screen_name = screen_name,count=200, tweet_mode='extended', max_id=oldest)
 		
 		#save most recent tweets
 		alltweets.extend(new_tweets)
@@ -48,11 +47,11 @@ def get_all_tweets(screen_name):
 		print "...%s tweets downloaded so far" % (len(alltweets))
 	
 	#transform the tweepy tweets into a 2D array that will populate the csv	
-	outtweets = [[tweet.id_str, tweet.created_at, tweet.text.encode("utf-8")] for tweet in alltweets]
+	outtweets = [[tweet.id_str, tweet.created_at, tweet.full_text.encode("utf-8").replace('\n', ' ').replace('|', ' ')] for tweet in alltweets]
 	
 	#write the csv	
 	with open('%s_tweets.csv' % screen_name, 'wb') as f:
-		writer = csv.writer(f)
+		writer = csv.writer(f, delimiter ='|')
 		writer.writerow(["id","created_at","text"])
 		writer.writerows(outtweets)
 	
@@ -61,6 +60,4 @@ def get_all_tweets(screen_name):
 
 if __name__ == '__main__':
 	#pass in the username of the account you want to download
-	get_all_tweets("theresa_may")
 	get_all_tweets("david_cameron")
-	get_all_tweets("campaignforleo")
